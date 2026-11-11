@@ -1,0 +1,94 @@
+import { test, expect } from "@playwright/test";
+
+async function open(page) {
+  await page.goto("./");
+  await expect(page.locator("#load-status")).toBeHidden();
+  await expect(page.locator("#flashcard")).toBeEnabled();
+}
+test("CSV loads at project URL; flip, rate, persist and review", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await open(page);
+  await expect(page.locator("#card-word")).toHaveText("ich");
+  await expect(page.locator("#known")).toBeDisabled();
+  await page.locator("#flashcard").click();
+  await expect(page.locator("#card-word")).toHaveText("I");
+  await page.locator("#known").click();
+  await expect(page.locator("#reviewed-count")).toHaveText("1");
+  await expect(page.locator("#deck-count")).toHaveText("99 cards remaining");
+  await page.reload();
+  await expect(page.locator("#reviewed-count")).toHaveText("1");
+  await page.locator("#study-mode").selectOption("new");
+  await expect(page.locator("#card-word")).toHaveText("sie");
+  await page.locator("#study-mode").selectOption("due");
+  await expect(page.locator("#empty-deck")).toBeVisible();
+  await page.locator("#study-mode").selectOption("all");
+  await page.locator("#flashcard").click();
+  await page.locator("#again").click();
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("germancards-progress-v1")));
+  expect(state["1"].streak).toBe(0);
+  expect(errors).toEqual([]);
+});
+test("noun articles and word families filter cards without leaking reverse answers", async ({ page }) => {
+  await open(page);
+  await page.locator("#study-limit").selectOption("5000");
+  await page.locator("#study-gender").selectOption("die");
+  await expect(page.locator("#study-category")).toHaveValue("noun");
+  await expect(page.locator("#card-article")).toHaveText("die");
+  await page.locator("#direction").selectOption("en-de");
+  await expect(page.locator("#dictionary-link")).toBeHidden();
+  await expect(page.locator("#speak")).toBeDisabled();
+  await page.locator("#flashcard").click();
+  await expect(page.locator("#card-article")).toHaveText("die");
+  await expect(page.locator("#dictionary-link")).toBeVisible();
+  await page.locator("#study-category").selectOption("verb");
+  await expect(page.locator("#study-gender")).toHaveValue("all");
+  await expect(page.locator("#card-pos")).toHaveText("verb");
+});
+test("library search, grammar groups, articles and pagination", async ({ page }) => {
+  await open(page);
+  await page.getByRole("link", { name: /Word library/ }).click();
+  await expect(page.locator("#word-rows tr")).toHaveCount(50);
+  await expect(page.locator("#word-rows tr").first()).toContainText("article");
+  await page.locator("#next-page").click();
+  await expect(page.locator("#page-label")).toHaveText("Page 2 of 100");
+  await page.locator("#search").fill("schön");
+  await expect(page.locator("#result-count")).not.toHaveText("5,000 words found");
+  await page.locator("#search").fill("house");
+  await expect(page.locator("#word-rows")).toContainText("Haus");
+  await page.locator("#search").fill("does-not-exist-xx");
+  await expect(page.locator("#word-rows")).toContainText("No matches");
+  await page.locator("#search").fill("");
+  await page.locator("#library-category").selectOption("noun");
+  await page.locator("#library-gender").selectOption("das");
+  await expect(page.locator("#word-rows tr").first().locator(".noun-article")).toHaveText("das");
+});
+test("guide, reset confirmation and narrow-screen layout", async ({ page }) => {
+  await open(page);
+  await page.locator("#flashcard").focus();
+  await page.keyboard.press("Space");
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator("#reviewed-count")).toHaveText("1");
+  await page.getByRole("link", { name: /Fast track guide/ }).click();
+  await expect(page.getByRole("heading", { name: "Articles: tiny words, important work." })).toBeVisible();
+  await page.getByRole("link", { name: /About the words/ }).click();
+  await page.locator("#reset-progress").click();
+  await page.getByRole("button", { name: "Keep progress" }).click();
+  await expect(page.locator("#reset-status")).toBeEmpty();
+  await page.locator("#reset-progress").click();
+  await page.getByRole("button", { name: "Reset progress", exact: true }).click();
+  await expect(page.locator("#reset-status")).toHaveText("Progress reset in this browser.");
+  await page.getByRole("link", { name: /Flashcards/ }).click();
+  await expect(page.locator("#reviewed-count")).toHaveText("0");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+test("CSV failures and corrupt local storage are explained without crashing", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("germancards-progress-v1", '{"1":{"streak":"bad"}}'));
+  await page.route("**/data/german-5000.csv", route => route.fulfill({ status: 404, body: "missing" }));
+  await page.goto("./");
+  await expect(page.locator("#load-status")).toContainText("Vocabulary could not load");
+  await expect(page.locator("#storage-warning")).toBeVisible();
+  await expect(page.locator("#card-area")).toBeHidden();
+  await page.getByRole("link", { name: /Fast track guide/ }).click();
+  await expect(page.locator("#guide")).toBeVisible();
+});

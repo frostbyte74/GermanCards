@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn German with 5,000 frequency-ranked flashcards, English meanings, noun articles, and a practical study guide.">
+  <meta name="theme-color" content="#122b39">
+  <title>GermanCards - A little German, every day.</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="#study" aria-label="GermanCards home">
+        <span class="brand-mark" aria-hidden="true">Gc<span>.</span></span>
+        <span>GermanCards<small>MAKE EVERY WORD COUNT</small></span>
+      </a>
+      <p class="sidebar-label">YOUR LEARNING SPACE</p>
+      <nav aria-label="Main navigation">
+        <a href="#study" data-page="study" class="active" aria-current="page"><span>01</span> Flashcards</a>
+        <a href="#library" data-page="library"><span>02</span> Word library</a>
+        <a href="#guide" data-page="guide"><span>03</span> Fast track guide</a>
+        <a href="#sources" data-page="sources"><span>04</span> About the words</a>
+      </nav>
+      <div class="sidebar-progress">
+        <span class="sidebar-label">YOUR VOCABULARY</span>
+        <strong id="mastered-count">0 <small>/ 5,000 secure</small></strong>
+        <progress id="mastery-progress" value="0" max="5000" aria-label="Secure vocabulary"></progress>
+        <p>Recall a word correctly three times to make it secure. Keep reviewing it.</p>
+      </div>
+      <div class="sidebar-bottom">
+        <span class="flag" aria-hidden="true"></span>
+        <p>A little German,<br><strong>every day.</strong></p>
+        <small>Free. No account. Progress stays in this browser.</small>
+      </div>
+    </aside>
+    <main id="main">
+      <div class="topline"><span>DEUTSCH / ENGLISH</span><span class="pill">5,000 WORDS. ONE GOOD HABIT.</span></div>
+      <div id="storage-warning" class="notice" role="status" hidden></div>
+      <div id="load-status" class="notice" role="status">Loading your vocabulary...</div>
+      <noscript><p class="notice">Enable JavaScript for flashcards, or download <a href="data/german-5000.csv">the complete vocabulary CSV</a>.</p></noscript>
+
+      <section id="study" class="page">
+        <header class="page-heading">
+          <p class="eyebrow">01 / DAILY PRACTICE</p>
+          <h1>Small cards.<br><em>Big conversations.</em></h1>
+          <p>Start with the words you will meet most. Say them aloud.<br class="desktop"> Recall first, flip second, repeat tomorrow.</p>
+        </header>
+        <div class="stats">
+          <div><strong id="reviewed-count">0</strong><span>words practiced</span></div>
+          <div><strong id="due-count">0</strong><span>ready for review</span></div>
+          <div><strong id="session-count">0</strong><span>recalls this session</span></div>
+        </div>
+        <form id="study-filters" class="filters" aria-label="Flashcard filters">
+          <label>Word family<select id="study-category"><option value="all">All word families</option></select></label>
+          <label>Frequency<select id="study-limit">
+            <option value="100">First 100 words</option><option value="500">First 500 words</option>
+            <option value="1000">First 1,000 words</option><option value="2500">First 2,500 words</option>
+            <option value="5000">All 5,000 words</option>
+          </select></label>
+          <label>Noun article<select id="study-gender"><option value="all">All articles</option>
+            <option value="der">der / masculine</option><option value="die">die / feminine</option><option value="das">das / neuter</option>
+          </select></label>
+          <label>Practice<select id="study-mode"><option value="all">All selected words</option>
+            <option value="new">New words only</option><option value="due">Due for review</option>
+          </select></label>
+        </form>
+        <div class="deck-top"><span id="deck-count">Preparing your deck...</span>
+          <div><label class="direction-label"><span class="sr-only">Card direction</span>
+            <select id="direction"><option value="de-en">German → English</option><option value="en-de">English → German</option></select>
+          </label><button id="shuffle" class="text-button" type="button">Shuffle deck</button></div>
+        </div>
+        <div id="card-area">
+          <button id="flashcard" class="flashcard" type="button" aria-label="Reveal translation" disabled>
+            <span class="card-top"><span id="card-language">GERMAN</span><span id="card-rank">#001</span></span>
+            <span class="card-center"><span id="card-article" lang="de"></span><strong id="card-word" lang="de">Hallo!</strong>
+              <span id="card-pos" class="badge">Your next conversation starts here</span></span>
+            <span id="card-hint">Think of the meaning, then tap to reveal</span>
+          </button>
+          <div class="card-tools"><button id="speak" type="button" class="text-button">Listen in German</button>
+            <span id="speech-status" role="status"></span><a id="dictionary-link" target="_blank" rel="noopener noreferrer">Dictionary ↗</a></div>
+          <p id="card-notes" class="card-notes"></p>
+          <div class="review-actions">
+            <button id="again" class="button secondary" type="button" disabled>Again <span>←</span></button>
+            <button id="skip" class="text-button" type="button">Skip for now</button>
+            <button id="known" class="button primary" type="button" disabled>Got it <span>→</span></button>
+          </div>
+        </div>
+        <div id="empty-deck" class="empty-state" hidden>
+          <span class="eyebrow">A MOMENT TO PAUSE</span><h2 id="empty-title">Deck complete.</h2>
+          <p id="empty-description"></p><button id="restart" class="button primary" type="button">Practice selection again</button>
+        </div>
+        <p id="review-feedback" class="feedback" aria-live="polite"></p>
+        <p class="hint">Keyboard: focus the card and press Space or Enter to flip. After revealing, ← again / → got it.</p>
+        <div class="study-tip"><span>THE TWO-MINUTE RULE</span><p>Learn a noun with its article: <strong lang="de">der Tisch</strong>, not just <span lang="de">Tisch</span>. Then use it: <span lang="de">Der Tisch ist groß.</span> / The table is big.</p></div>
+      </section>
+
+      <section id="library" class="page" hidden>
+        <header class="page-heading"><p class="eyebrow">02 / YOUR REFERENCE SHELF</p><h1>Find your<br><em>next word.</em></h1>
+          <p>Browse by grammar family, then frequency. Every card comes from this CSV.</p></header>
+        <form id="library-filters" class="filters library-filters" aria-label="Vocabulary filters">
+          <label class="search-label">Search German or English<input id="search" type="search" placeholder="Try Haus, house, or schön" autocomplete="off"></label>
+          <label>Word family<select id="library-category"><option value="all">All word families</option></select></label>
+          <label>Noun article<select id="library-gender"><option value="all">All articles</option>
+            <option value="der">der / masculine</option><option value="die">die / feminine</option><option value="das">das / neuter</option>
+          </select></label>
+          <label>Sort by<select id="library-sort"><option value="family">Word family + frequency</option>
+            <option value="rank">Frequency rank</option><option value="alpha">German A–Z</option></select></label>
+        </form>
+        <div class="deck-top"><span id="result-count" aria-live="polite"></span><a class="download-link" href="data/german-5000.csv" download>Download 5,000-word CSV ↓</a></div>
+        <div class="table-wrap"><table>
+          <caption class="sr-only">German vocabulary with English meanings, parts of speech, and noun articles</caption>
+          <thead><tr><th scope="col">Rank</th><th scope="col">German</th><th scope="col">English</th><th scope="col">Word family</th></tr></thead>
+          <tbody id="word-rows"></tbody>
+        </table></div>
+        <div class="pagination"><button id="prev-page" class="button secondary" type="button">← Previous</button>
+          <span id="page-label"></span><button id="next-page" class="button secondary" type="button">Next →</button></div>
+      </section>
+
+      <section id="guide" class="page prose" hidden>
+        <header class="page-heading"><p class="eyebrow">03 / A PRACTICAL START</p><h1>Learn less.<br><em>Use it more.</em></h1>
+          <p>A focused routine for your first month. A fast start, not a promise of fluency.</p></header>
+        <div class="callout"><strong>Your daily 25 minutes</strong><p>5 min: recall yesterday's cards. 10 min: learn 10–15 new words. 5 min: listen and repeat short German sentences. 5 min: describe your day aloud. Review before adding more.</p></div>
+        <div class="lesson-grid">
+          <article class="lesson"><span class="eyebrow">WEEK 01</span><h2>Build your survival kit.</h2><p>Study the first 100 words. Practice introductions, polite requests, numbers, and questions. Learn whole chunks, not isolated translations.</p>
+            <p lang="de"><strong>Hallo! Ich heiße ...</strong><br><span lang="en">Hello! My name is ...</span></p>
+            <p lang="de"><strong>Ich lerne Deutsch. Bitte langsam.</strong><br><span lang="en">I'm learning German. Slowly, please.</span></p>
+            <p lang="de"><strong>Was bedeutet das?</strong><br><span lang="en">What does that mean?</span></p>
+          </article>
+          <article class="lesson"><span class="eyebrow">WEEK 02</span><h2>Make simple sentences.</h2><p>Add common verbs and nouns. In a main statement, the conjugated verb is the second element (not necessarily the second word).</p>
+            <p lang="de"><strong>Ich trinke heute Wasser.</strong><br><span lang="en">I am drinking water today.</span></p>
+            <p lang="de"><strong>Heute trinke ich Wasser.</strong><br><span lang="en">Today I am drinking water.</span></p>
+            <p>German nouns start with capitals. Learn <span lang="de">das Wasser</span> (water), not just <span lang="de">Wasser</span>.</p>
+          </article>
+          <article class="lesson"><span class="eyebrow">WEEK 03</span><h2>Connect your thoughts.</h2><p>Add time words, adjectives, and connectors. Use <span lang="de">und</span> (and), <span lang="de">aber</span> (but), and <span lang="de">weil</span> (because). With <span lang="de">weil</span>, the conjugated verb normally goes last in its clause.</p>
+            <p lang="de"><strong>Ich lerne, weil ich in Berlin arbeiten möchte.</strong><br><span lang="en">I'm studying because I'd like to work in Berlin.</span></p>
+            <p>Write three true sentences about your own life every day.</p>
+          </article>
+          <article class="lesson"><span class="eyebrow">WEEK 04</span><h2>Turn recall into conversation.</h2><p>Role-play a café order, directions, a shop visit, and a short introduction. Retell a short audio clip in your own words. Keep daily reviews and revisit words you hesitate on.</p>
+            <p lang="de"><strong>Ich hätte gern einen Kaffee.</strong><br><span lang="en">I'd like a coffee.</span></p>
+            <p lang="de"><strong>Können Sie das bitte wiederholen?</strong><br><span lang="en">Could you repeat that, please?</span></p>
+          </article>
+        </div>
+        <h2>Articles: tiny words, important work.</h2>
+        <p><span lang="de">der</span>, <span lang="de">die</span>, and <span lang="de">das</span> all mean "the." Gender is grammatical, not reliably predictable from meaning. Case changes the article. The CSV's noun article is nominative singular, not the article for every sentence.</p>
+        <div class="table-wrap"><table><caption>Definite articles by case</caption>
+          <thead><tr><th>Case</th><th>Masculine</th><th>Feminine</th><th>Neuter</th><th>Plural</th></tr></thead>
+          <tbody lang="de"><tr><th lang="en">Nominative / subject</th><td>der</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><th lang="en">Accusative / direct object</th><td>den</td><td>die</td><td>das</td><td>die</td></tr>
+            <tr><th lang="en">Dative / often indirect object</th><td>dem</td><td>der</td><td>dem</td><td>den</td></tr>
+            <tr><th lang="en">Genitive / possession</th><td>des</td><td>der</td><td>des</td><td>der</td></tr></tbody>
+        </table></div>
+        <p><strong>A/an:</strong> nominative <span lang="de">ein Mann, eine Frau, ein Kind</span>; accusative <span lang="de">einen Mann, eine Frau, ein Kind</span>. There is no plural indefinite article. Dative plural nouns usually add <span lang="de">-n</span> unless already ending in <span lang="de">-n</span> or <span lang="de">-s</span>.</p>
+        <h2>Two verbs worth knowing first.</h2>
+        <div class="table-wrap"><table><thead><tr><th>Pronoun</th><th>sein / to be</th><th>haben / to have</th></tr></thead>
+          <tbody lang="de"><tr><td>ich</td><td>bin</td><td>habe</td></tr><tr><td>du</td><td>bist</td><td>hast</td></tr>
+            <tr><td>er / sie / es</td><td>ist</td><td>hat</td></tr><tr><td>wir</td><td>sind</td><td>haben</td></tr>
+            <tr><td>ihr</td><td>seid</td><td>habt</td></tr><tr><td>sie / Sie</td><td>sind</td><td>haben</td></tr></tbody></table></div>
+        <h2>Hear the difference.</h2>
+        <p><strong>ei</strong> sounds like the vowel in "my"; <strong>ie</strong> like "see"; <strong>w</strong> like English "v"; <strong>z</strong> like "ts"; <strong>sch</strong> like "sh"; <strong>ß</strong> like "ss". For <strong>ü</strong>, say "ee" while rounding your lips; for <strong>ö</strong>, round your lips while saying "eh". These are starting cues, not substitutes for native audio.</p>
+        <p><strong>Numbers 1–10:</strong> <span lang="de">eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn</span>. For 21, German says "one-and-twenty": <span lang="de">einundzwanzig</span>.</p>
+        <div class="study-tip"><span>MAKE IT PERSONAL</span><p>A card gives you a useful meaning, not every meaning. Check the linked dictionary for grammar, additional senses, and examples. Practice a sentence before calling a word learned.</p></div>
+      </section>
+
+      <section id="sources" class="page prose" hidden>
+        <header class="page-heading"><p class="eyebrow">04 / OPEN WORDS, CLEAR SOURCES</p><h1>Know what<br><em>you're learning.</em></h1><p>A transparent, editable vocabulary deck. No subscriptions or tracking.</p></header>
+        <h2>What "5,000 common words" means here</h2>
+        <p>This deck selects 5,000 distinct German words with usable English dictionary senses, ordered by their frequency in <strong>OpenSubtitles 2018</strong>. It is a corpus-based study selection, not a universal or certified top-5,000 list. Film dialogue favors conversation, drama, slang, and sometimes adult vocabulary over formal writing.</p>
+        <p>Nonwords, proper-name-only entries, unresolved inflections, and nouns without sourced articles are excluded. Study ranks therefore differ from the original corpus ranks. Counts refer to surface spellings, not combined inflections. Some inflected function words remain because they are useful to learn. Nouns are capitalized for display.</p>
+        <p>English glosses and grammar are dictionary-derived, with common function-word explanations edited for learning. Unambiguous inflected adjective/verb forms use the base word's English meaning; card notes identify the base and grammatical form, so the English is not necessarily tense-specific. One primary word family and a few senses are shown; a word can have other roles, genders, or meanings. Automated matching is not a full teacher review, and subtitle casing can make homographs ambiguous.</p>
+        <h2>Sources &amp; reuse</h2>
+        <p>Frequency: <a href="https://github.com/hermitdave/FrequencyWords">hermitdave/FrequencyWords</a>, OpenSubtitles 2018 German list (MIT). Grammar and noun articles: <a href="https://github.com/natema/wordhoard">wordhoard v0.1.0</a>, using spaCy and German Wiktionary via german-nouns and kaikki.org. English definitions: Wiktionary contributors, extracted by <a href="https://kaikki.org">kaikki.org</a> / wiktextract (Tatu Ylönen), packaged in <a href="https://github.com/heuwels/lector/releases/tag/dict-de-2026-06-25">Lector's German dictionary release</a>.</p>
+        <p>The adapted CSV is <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>: credit the sources and share adaptations under that license. See <a href="ATTRIBUTION.md">full attribution and changes</a> and the <a href="data/manifest.json">machine-readable data manifest</a>. Application code is MIT. The layout concept takes inspiration from <a href="https://github.com/KardelRuveyda/ab-731-study-notes">Kardel Rüveyda Çetin's study site</a>; its code and content are not copied.</p>
+        <h2>Your progress belongs to you.</h2>
+        <p>Progress is stored only in this browser's local storage. There is no login, analytics, or cloud sync. Clearing browser data clears progress. "Again" repeats a card in this session and schedules review in 10 minutes; "Got it" schedules 1, 3, 7, then 14 days. Three consecutive successful recalls marks it secure, not permanently mastered.</p>
+        <p>Pronunciation uses your browser's speech engine. German voice availability varies; browser or operating-system speech services may process spoken text. No microphone is used.</p>
+        <button id="reset-progress" class="button secondary" type="button">Reset saved progress</button>
+        <p id="reset-status" role="status"></p>
+        <dialog id="reset-dialog"><h2>Start fresh?</h2><p>This permanently removes this site's vocabulary progress from this browser.</p>
+          <form method="dialog" class="review-actions"><button class="button secondary" value="cancel">Keep progress</button>
+            <button class="button primary" value="reset">Reset progress</button></form></dialog>
+      </section>
+      <footer>Built for a daily habit, not an overnight miracle.<span lang="de">Viel Erfolg!</span></footer>
+    </main>
+  </div>
+</body>
+</html>
